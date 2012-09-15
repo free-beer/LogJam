@@ -86,6 +86,12 @@ module LogJam
    def self.names
       @@logjam_loggers.keys.compact
    end
+
+   # A convenience mechanism that provides an instance level access to the
+   # class level logger.
+   def log
+      self.class.log
+   end
    
    private
    

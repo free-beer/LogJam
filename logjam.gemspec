@@ -3,7 +3,7 @@
 
 spec = Gem::Specification.new do |s|
    s.name        = "logjam"
-   s.version     = "0.0.3"
+   s.version     = "0.0.4"
    s.platform    = Gem::Platform::RUBY
    s.authors     = ["Black North"]
    s.email       = "ruby@blacknorth.com"
