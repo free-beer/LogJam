@@ -3,6 +3,7 @@
 # Copyright (c), 2012 Peter Wood
 # See the license.txt for details of the licensing of the code in this file.
 
+gem 'test-unit', ">= 2.0.0"
 require 'json'
 require 'logjam'
 require 'pp'
@@ -13,7 +14,11 @@ class MyClass
    LogJam.apply(self, "my_class")
 end
 
-class TestLogJamConfigure < Test::Unit::TestCase
+class TestLogJamApply < Test::Unit::TestCase
+   class << self
+      include StartUpAndShutdown
+   end
+
    def setup
       if File.exists?("logs")
          # Delete all existing log files.

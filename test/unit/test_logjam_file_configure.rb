@@ -3,34 +3,29 @@
 # Copyright (c), 2012 Peter Wood
 # See the license.txt for details of the licensing of the code in this file.
 
+gem 'test-unit', ">= 2.0.0"
 require 'json'
 require 'logjam'
 require 'pp'
 require 'test/unit'
 require 'yaml'
 
-class TestLogJamConfigure < Test::Unit::TestCase
+class TestLogJamFileConfigure < Test::Unit::TestCase
+   class << self
+      include StartUpAndShutdown
+   end
+   include SuiteUtilities
+
    def setup
-      if File.exists?("logs")
-         # Delete all existing log files.
-         Dir.foreach("logs") do |file_name|
-            if file_name.length > 3 && file_name[-4,4] == ".log"
-               puts "Deleting 'logs#{File::SEPARATOR}#{file_name}'"
-               File.delete("logs#{File::SEPARATOR}#{file_name}")
-            end
-         end
-      else
-         # Create the logs directory.
-         Dir.mkdir("logs")
-      end
-      LogJam.configure({})
+      clear_configurations 
    end
    
    def teardown
    end
 
    def test_yaml_configure
-      LogJam.configure("logging.yaml")
+      write_yaml_configuration
+      LogJam.configure("./config/logging.yml")
 
       assert_equal(false, LogJam.names.empty?)
       assert_equal(3, LogJam.names.size)
@@ -45,7 +40,8 @@ class TestLogJamConfigure < Test::Unit::TestCase
    end
 
    def test_json_configure
-      LogJam.configure("logging.json")
+      write_json_configuration
+      LogJam.configure("./config/logging.json")
 
       assert_equal(false, LogJam.names.empty?)
       assert_equal(3, LogJam.names.size)
