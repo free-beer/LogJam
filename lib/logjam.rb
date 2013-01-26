@@ -4,6 +4,7 @@
 # See the license.txt for details of the licensing of the code in this file.
 
 require 'logger'
+require 'logjam/version'
 require 'logjam/exceptions'
 require 'logjam/logjam_logger'
 require 'logjam/logjam'

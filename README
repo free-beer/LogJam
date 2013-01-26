@@ -67,7 +67,8 @@ which the following keys are recognised (either as Strings or Symbols)...
    name                      The name to associate with the logger. This allows
                              loggers to be tied to classes or for the creation
                              of aliases that tie multiple names to a single
-                             logger.
+                             logger. Note that you should always use Strings
+                             (and not Symbols) when specifying aliases.
    rotation                  The frequency with which the log file is rotated.
                              This may be an integer to indicate how many old log
                              files are retained or may be a String such as
@@ -309,3 +310,12 @@ JSON
     "aliases": {"database":"secondary",
                 "model": "secondary",
                 "controller": "main"}}
+
+Testing
+-------
+LogJam uses the test-unit Ruby library for testing. The best approach to running
+the tests are to create a new gemset (assuming you're using RVM), do a bundle
+install on this gemset from within the LogJam root directory and then use a
+command such as the following to run the tests...
+
+    $> ruby -I./lib -I./test ./test/unit/test_logjam.rb

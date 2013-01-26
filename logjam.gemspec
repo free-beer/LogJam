@@ -1,9 +1,10 @@
 # Copyright (c) 2011, Peter Wood
 # All rights reserved.
+require File.expand_path('../lib/logjam/version', __FILE__)
 
 spec = Gem::Specification.new do |s|
    s.name        = "logjam"
-   s.version     = "0.0.4"
+   s.version     = LogJam::VERSION
    s.platform    = Gem::Platform::RUBY
    s.authors     = ["Black North"]
    s.email       = "ruby@blacknorth.com"
