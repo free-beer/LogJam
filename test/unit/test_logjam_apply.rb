@@ -19,7 +19,6 @@ class TestLogJamConfigure < Test::Unit::TestCase
          # Delete all existing log files.
          Dir.foreach("logs") do |file_name|
             if file_name.length > 3 && file_name[-4,4] == ".log"
-               puts "Deleting 'logs#{File::SEPARATOR}#{file_name}'"
                File.delete("logs#{File::SEPARATOR}#{file_name}")
             end
          end
@@ -40,6 +39,7 @@ class TestLogJamConfigure < Test::Unit::TestCase
       sizes = [File.size("logs/my_class.log"), File.size("logs/other.log")]
       
       MyClass.log.debug "Line one."
+      (MyClass.new).log.debug "Line two."
       assert_equal(true, (File.size("logs/my_class.log") > sizes[0]))
       assert_equal(true, (File.size("logs/other.log") == sizes[1]))
       

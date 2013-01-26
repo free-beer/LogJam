@@ -49,7 +49,8 @@ which the following keys are recognised (either as Strings or Symbols)...
    -----------------------   --------------------------------------------------
    default                   A boolean indicating whether this logger is the
                              default (i.e. the one to be used when no other
-                             fits the bill).
+                             fits the bill). Only one logger should be declared
+                             as a default.
    datetime_format           The date/time format to be used by the logger. See
                              the documentation for the standard Ruby Logger
                              class for more details.
@@ -58,7 +59,8 @@ which the following keys are recognised (either as Strings or Symbols)...
                              recognised in this value. STDOUT and STDERR are
                              translated to mean the standard output or error
                              streams respectively.
-   level                     The logging level to set on the logger.
+   level                     The logging level to set on the logger. If not
+                             explicitly specified this defaults to DEBUG.
    max_size                  When rotation is set to an integer value this value
                              can be set to indicate the maximum permitted file
                              size for a log file.
@@ -86,7 +88,9 @@ fashion. In this case the method searches for a configuration file that it can
 use given a default set of files names (basically logging.yaml, logging.yml and
 logging.json in the current working directory and in a subdirectory of the
 current working directory called config). The first of these files that it finds
-it attempts to use as configuration for the logging set up.
+it attempts to use as configuration for the logging set up. If it doesn't find
+a configuration file then this type of call becomes equivalent to passing an
+empty Hash to the configure() method.
 
 See the end of this document for some example configurations.
 
@@ -114,9 +118,12 @@ specified or if a matching logger does not exist, the class will fall back in
 using the default logger.
 
 Once this line has been added to the class definition it will cause the class to
-be extended with two methods - one called log() and one called log=(). The first
-of these retrieves the Logger instance to be used by the class instances. The
-second allows the Logger instance associated with a class to be altered.
+be extended with three methods - two class level methods (one called log() and
+one called log=()) and an instance level method called log(). The log() methods
+retrieve the Logger instance to be used by the class instances. The log=()
+method allows the Logger instance associated with a class to be altered. Note
+the instance level log() method will only be added if an existing method with
+that name does not already exist on the class.
 
 The following complete (although contrived) example gives an overview of how
 this would work...
@@ -263,3 +270,42 @@ JSON
                 {"file": "STDOUT",
                  "name": "verbose"}],
     "aliases": {"database":"verbose"}}
+
+The following configuration can be used as an example of how to drive logging
+from different parts of the code to different destinations. The configuration
+declares two loggers which deliver their output to two different log files and
+then declares aliases for those loggers that can be used to divide up the
+logging coming from different areas of the code.
+
+Hash
+   {:loggers => [{:default => true,
+                  :file    => "./log/main.log",
+                  :name    => "main"},
+                 {:file    => "./log/secondary.log",
+                  :name    => "secondary"}],
+    :aliases => {"database"   => "secondary",
+                 "model"      => "secondary",
+                 "controller" => "main"}}
+
+YAML
+   --- 
+   :loggers: 
+   - :default: true
+     :file: ./log/main.log
+     :name: main
+   - :file: ./log/secondary.log
+     :name: secondary
+   :aliases: 
+     database: secondary
+     model: secondary
+     controller: main
+
+JSON
+   {"loggers": [{"default":true,
+                 "file": "./log/main.log",
+                 "name": "main"},
+                {"file": "./log/secondary.log",
+                 "name": "secondary"}],
+    "aliases": {"database":"secondary",
+                "model": "secondary",
+                "controller": "main"}}

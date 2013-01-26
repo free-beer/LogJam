@@ -69,6 +69,7 @@ module LogJam
    #           to indicate use of the default logger.
    def self.apply(target, name=nil)
       target.extend(LogJam.get_module(name))
+      target.send(:define_method, :log) {LogJam.get_logger(name)} if !target.method_defined?(:log)
    end
 
    # This method attempts to fetch the logger for a specified name. If this
