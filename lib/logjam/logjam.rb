@@ -27,8 +27,9 @@ module LogJam
                                 ".#{File::SEPARATOR}config#{File::SEPARATOR}logging.json"]
 
    # Module static properties.
-   @@logjam_modules = {}
-   @@logjam_loggers = {}
+   @@logjam_modules  = {}
+   @@logjam_loggers  = {}
+   @@logjam_contexts = {}
    
    # This method is used to configure the LogJam module with the various loggers
    # it will use.
@@ -64,11 +65,14 @@ module LogJam
    # classes that use the same logger.
    #
    # ==== Parameters
-   # target::  The target class that is to be extended.
-   # name::    The name of the logger to be used by the class. Defaults to nil
-   #           to indicate use of the default logger.
-   def self.apply(target, name=nil)
-      target.extend(LogJam.get_module(name))
+   # target::   The target class that is to be extended.
+   # name::     The name of the logger to be used by the class. Defaults to nil
+   #            to indicate use of the default logger.
+   # context::  A Hash of additional parameters that are specific to the class
+   #            to which LogJam is being applied.
+   def self.apply(target, name=nil, context={})
+      @@logjam_contexts[target] = {}.merge(context)
+      target.extend(LogJam.get_module(name, @@logjam_contexts[target]))
       target.send(:define_method, :log) {LogJam.get_logger(name)} if !target.method_defined?(:log)
    end
 
@@ -100,8 +104,9 @@ module LogJam
    # not exist the default module is returned instead.
    #
    # ==== Parameters
-   # name:: The name associated with the module to return.
-   def self.get_module(name)
+   # name::     The name associated with the module to return.
+   # context::  The context that applies to the module to be retrieved.
+   def self.get_module(name, context={})
       LogJam.create_module(name)
    end
 

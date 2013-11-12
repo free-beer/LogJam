@@ -8,4 +8,4 @@ require 'logjam/version'
 require 'logjam/exceptions'
 require 'logjam/logjam_logger'
 require 'logjam/logjam'
-
+require 'logjam/object'
