@@ -63,7 +63,7 @@ The meanings applied to these keys are as follows...
    to DEBUG.
 
  * max_size: When rotation is set to an integer value this value can be set to
-   indicate the maximum permitted file size for a log file.
+   indicate the maximum permitted file size for a log file in bytes.
 
  * name: The name to associate with the logger. This allows loggers to be tied
    to classes or for the creation of aliases that tie multiple names to a single
