@@ -6,22 +6,18 @@
 class Object
    # This method provides an instance level accessor to obtain a logger. Unless
    # a name is specified the logger returned is the default one.
-   #
-   # ==== Parameters
-   # name::  The name of the logger to retrieve. Defaults to nil to indicate
-   #         that the default logger should be returned.
-   def log(name=nil)
-      LogJam.get_logger(name)
+   def log
+      LogJam.get_logger
    end
 
    # This method provides a class level accessor to obtain a logger. Unless a
    # name is specified the logger returned is the default one.
-   #
-   # ==== Parameters
-   # name::  The name of the logger to retrieve. Defaults to nil to indicate
-   #         that the default logger should be returned.
-   def self.log(name=nil)
-      LogJam.get_logger(name)
+   def self.log
+      LogJam.get_logger
+   end
+
+   def self.log=(logger)
+      LogJam.get_logger.logger = logger
    end
 
    # This method allows a class to specify the name of the logger that it uses

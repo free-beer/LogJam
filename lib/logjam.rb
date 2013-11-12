@@ -9,3 +9,5 @@ require 'logjam/exceptions'
 require 'logjam/logjam_logger'
 require 'logjam/logjam'
 require 'logjam/object'
+
+LogJam.configure(nil)
