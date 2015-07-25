@@ -7,34 +7,17 @@ require 'stringio'
 
 module LogJam
    # This class provides the exception class used by the LogJam library.
-   class LogJamError < StandardError
-      # Attribute accessor/mutator declarations.
-      attr_accessor :verbose
-
-      # Constructor for the LogJamError class.
+   class Error < StandardError
+      # Constructor for the LogJam::Error class.
       #
       # ==== Parameters
       # message::  The message to be associated with the error.
       # cause::    Any underlying exception to be associated with the error.
       #            Defaults to nil.
-      def initialize(message, cause=nil, verbose=true)
+      def initialize(message, cause=nil)
          super(message)
-         @cause   = cause
-         @verbose = verbose
+         @cause = cause
       end
-
-      # This method fetches a stringified interpretation of an exception.
-      def to_s()
-         text = StringIO.new
-         text << super
-         if @verbose
-            text << "\n" + self.backtrace.join("\n")
-            if !@cause.nil?
-               text << "\n\nCause: #{@cause}"
-               text << "\n" + @cause.backtrace.join("\n")
-            end
-         end
-         text.string
-      end
+      attr_reader :cause
    end
 end

@@ -1,0 +1,17 @@
+development:
+  loggers:
+    - default: true
+      file: STDOUT
+      name: devlog
+
+test:
+  loggers:
+    - default: false
+      file: <%= File.join(Dir.getwd, "logs", "test.log") %>
+      name: testlog
+
+production:
+  loggers:
+    - default: true
+      file: <%= File.join(Dir.getwd, "logs", "production.log") %>
+      name: prodlog
