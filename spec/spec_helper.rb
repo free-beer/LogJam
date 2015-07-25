@@ -19,9 +19,6 @@
 
 ENV["RACK_ENV"] = "test"
 
-# TBD: DEBUGGING ONLY, REMOVE THIS LATER!!!!!
-$:.unshift(File.join(Dir.getwd, "..", "configurative", "lib"))
-
 require 'logjam'
 require 'stringio'
 

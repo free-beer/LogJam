@@ -6,46 +6,61 @@ creating this library were...
 
    * Easy of use. Fall back on defaults as much as possible and allow the
      functionality to be integrated and used with the least amount of work.
-     
+
    * Flexibility. After easy of use is taken into consideration it should be
      possible to use the library in a more advanced fashion if that is called
      for.
-     
+
    * Minimize the code to use it. It shouldn't require a great deal of code to
      deploy or use the facilities and there should be no code required to pass
      entities such as loggers around.
-     
+
    * Usable in libraries. I found myself writing a lot of common logging code
      when writing libraries and application and wanted to abstract that out. I
      wanted to minimize the burden this placed on library users at the same
      time.
 
+## Release Log
+
+ * v1.2.0: This version sees a major rewrite of the internals of the library
+   while attempting to retain backward compatibility. Library configuration
+   has been changed to get greater flexibility and to allow for the logging
+   configuration to be folded into a larger configuration file. The tests were
+   all changed to rspec and more extensive tests written.
+
 ## Configuration & Setup
 
-To explicitly configure the settings LogJam you make a call to the
-LogJam#configure() method. This method takes a single parameter which should be
-either a String, a Hash, an IO object or nil.
+The simplest setup to use with this library is to create a YAML file in the
+called ```logging.yml```, either in the current working directory or in a
+subdirectory of the working directory called ```config```. Place the following
+contents into this file...
 
-If you pass a String in this is expected to contain the path and name of a file
-that contains the logging configuration. Logging configuration files can be
-provided in either YAML or JSON format. If you pass an IO object this is
-expected to be the source of the configuration and, again, this configuration
-should be in either YAML or JSON format. In either case, where a String or IO
-is specified, the data read must be translatable into a Hash, which brings us
-to the other type that the LogJam#configure() method accepts as a parameter.
+    development:
+      loggers:
+      - default: true
+        file: STDOUT
+        name: devlog
+    production:
+      loggers:
+      - default: true
+        file: ./logs/production.log
+        name: prodlog
+    test:
+      loggers:
+      - default: true
+        file: STDOUT
+        name: testlog
 
-A Hash passed to the configure() method is expected to contain a set of values
-that can be converted into a logging set up. Passing an empty Hash will result
-in set up containing a single, universal logger attached to the standard output
-stream being created and used by all classes that have LogJam functionality.
+By doing this you've now created a configuration that is environment dependent
+and that the LogJam library will automatically pick up. When run in the
+development (the default environment if no other is specified) or test
+environments your application will now log to the standard output stream. For
+the production environment the logging output will be written to a file called
+```production.log``` which will be in the ```logs``` subdirectory.
 
-The Hash passed to the configure() method can contain two keys that the library
-will recognise and use. The first of these is 'loggers', in either Symbol or
-String form. The value under the loggers key is expected to be an Array
-containing zero or more logger definitions. An individual logger definition is
-itself a Hash in which the following keys are recognised (either as Strings or
-Symbols) - default, datetime_format, file, level, max_size, name and rotation.
-The meanings applied to these keys are as follows...
+The settings covered in the example configuration above are just some of the
+parameters recognised for the definition of a logger. Here is a more complete
+list of parameters that are used when creating loggers...
 
  * default: A boolean indicating whether this logger is the default (i.e. the
    one to be used when no other explicitly fits the bill). Only one logger
@@ -75,30 +90,33 @@ The meanings applied to these keys are as follows...
    such as "daily", "weekly" or "monthly".
 
 A note on logger names. Logger names (including alias names) aren't hierarchical
-and should be unique.
+and should be unique. Note that you may specify multiple logger definitions if
+you wish, which would look like this...
 
-The second key recognised in the configuration Hash is 'aliases', again as
-either a String or Symbol. The value under the aliases key is expected to be a
-Hash that maps String keys to String values. The key values are expected to be
-alias names and the mapped values are expected to be the name of a logger
-declared in the logger section. An entry in the aliases Hash creates an alias
-for an existing logger under a different name.
+    development:
+      loggers:
+      - default: true
+        file: STDOUT
+        name: devlog
+      - file: ./logs/development.log
+        name: filelog
 
-The final parameter option when calling LogJam#configure() is to pass a nil to
-the method. If you pass nil to the configure method it behaves in a slightly
-different fashion. In this case the method searches for a configuration file
-that it can use given a default set of files names (logging.yaml, logging.yml
-and logging.json in the current working directory and in a subdirectory of the
-current working directory called config). The first of these files that it finds
-it attempts to use as configuration for the logging set up. If it doesn't find
-a configuration file then this type of call becomes equivalent to passing an
-empty Hash to the configure() method. As of version 1.1.0 the library includes
-an implicit call to LogJam#configure(nil) removing the need to do this
-explicitly in your own code.
+In addition to specifying logger definitions you can also specify logger
+aliases. This is essentially a mechanism to allow a single logger to be
+available under multiple names and a configuration including an alias definition
+might look as follows...
 
-Note that you can call LogJam#configure multiple times, with each successive
-call overwriting and replacing the details of previous calls. See the end of
-this document for some example configurations.
+    development:
+      loggers:
+      - default: true
+        file: STDOUT
+        name: devlog
+      aliases:
+        database: devlog
+
+If you don't provide a logging configuration then the LogJam library will fall
+back on creating a single default logger that writes everything to the standard
+output stream.
 
 ## Logging With The Library
 
@@ -109,85 +127,30 @@ Configuration & Setup section in which it's explained how to configure logging
 from a single Hash or file. This section will provide details on how to deploy
 loggers to various classes.
 
-The LogJam library works by providing an extension to any class that uses it
-that provides access to the logger to be used by the class. As of version 1.1.0
-LogJam applies itself as an extension to the Ruby Object class, making the
-logging facilities it provides available in any object. Prior to v1.1.0 you had
-to make a call the apply() method of the LogJam module inside your class
-definition. A typical call of this type might look like...
+The LogJam library extends the object class to make access to a logger available
+at both the class and the instance level. The obtain a logger object you can
+make a call to the ```#log()``` method. If you haven't explicitly configured a
+logger for a class this will return an instance of the default logger. A version
+of this method is also available at the instance level.
 
-```
-   # Apply logging facilties to my class.
-   LogJam.apply(self, "my_logger")
-```
-   
-This option remains available for backward compatibility but is no longer
-needed. A line like this would appear somewhere inside the definition for the
-class that will use logging. The first parameter to the call is the class that
-is to be extended with the LogJam functionality. The second parameter is the
-name of the logger that the class will use. Note that this parameter is optional
-and, if notspecified or if a matching logger does not exist, the class will fall
-back in using the default logger.
+If you want to get more advanced and configure a particular logger for a
+specific class or group of classes then you have to explicitly set the logger
+on those classes. To do that you define multiple loggers in your configuration
+and then make a call to the ```#set_logger_name()``` method for the affected
+class. For example, if you defined a logger called string_logger that you wanted
+to use just for String objects you could do that like so...
 
-From version 1.1.0 onward you no longer need to call apply. Instead LogJams
-logging facilities are available in all objects. This change means that all
-classes use the default logger as standard. If you want to continue to use an
-explitictly named logger on a per class basis you can make a call to the
-LogJam#set_logger_name() method within your class definitions. This is similar
-in nature to how the apply method was used and so would look something like the
-following...
+    String.set_logger_name("string_logger")
 
-```
-   # Use an explicitly named logger for my class.
-   set_logger_name "my_logger"
-```
+With your code you can obtain a logger instance and then use the method common
+to Ruby's Logger class on the object returned. So, to log a statement at the
+info level in a piece of code you would do something like this...
 
-LogJams logging facilities consist of two class level methods (one called log()
-and one called log=()) and an instance level method called log(). The log()
-methods retrieve the Logger instance to be used by the class instances. The
-log=() method allows the Logger instance associated with a class to be altered.
-You should take care when assigning a logger in this fashion as assigning it
-on one class may have an impact on many classes (e.g. if there is only a single
-default logger defined in configuration).
+    log.info("This is a statement that I am logging.")
 
-The following complete (although contrived) example gives an overview of how
-this would work...
+Consult the documentation of the Ruby Logger class for more information on the
+methods and logging levels available.
 
-```
-   require 'rubygems'
-   require 'logjam'
-   
-   class Writer
-      def initialize(stream=STDOUT)
-         @stream = stream
-      end
-      
-      def echo(message)
-         log.debug("Echoed: #{message}")
-         @stream.puts message
-      end
-   end
-   
-   begin
-      LogJam.configure({:loggers => [{:name => "echo",
-                                      :file => "echo.log"}]})
-                                      
-      writer = Writer.new
-      writer.echo "This is a string containing my message."
-   rescue => error
-      puts "ERROR: #{error}\n" + error.backtrace.join("\n")
-   end
-```
-
-In this example we create a Writer class that can echo a String on a stream. In
-doing this it also logs the message echoed at the debug level. We can simply
-call the log() method to get the class logger.
-
-In the later section of the code we configure the LogJam system to have a single
-Logger that writes to the echo.log file. We then create a Writer instance and
-use it to write a simple message. This message should appear on the standard
-output stream and be logged to the echo.log file.
- 
 ## Advanced Usage
 
 The hope would be that this library can be used in the creation of other
@@ -257,7 +220,7 @@ Hash
 
 YAML
 ```
-   :loggers: 
+   :loggers:
    - :default: true
      :file: application.log
 ```
@@ -288,14 +251,14 @@ Hash
 
 YAML
 ```
-   :loggers: 
+   :loggers:
    - :default: true
      :file: STDOUT
      :level: UNKNOWN
      :name: silent
    - :file: STDOUT
      :name: verbose
-   :aliases: 
+   :aliases:
      database: verbose
 ```
 
@@ -330,13 +293,13 @@ Hash
 
 YAML
 ```
-   :loggers: 
+   :loggers:
    - :default: true
      :file: ./log/main.log
      :name: main
    - :file: ./log/secondary.log
      :name: secondary
-   :aliases: 
+   :aliases:
      database: secondary
      model: secondary
      controller: main
@@ -356,20 +319,20 @@ JSON
 
 ## Testing
 
-LogJam uses the minitest Ruby library for testing. The best approach to running
+LogJam uses the RSpec Ruby library for testing. The best approach to running
 the tests are to create a new gemset (assuming you're using RVM), do a bundle
 install on this gemset from within the LogJam root directory and then use a
 command such as the following to run the tests...
 
 ```
-    $> rake test:unit
+    $> rspec
 ```
 
-Individual tests can be run by including a definition for TESTS which contains
-a comma separated_list of the tests to be run. For example...
+Individual tests can be run by appending the path to the file that you want to
+execute after the ```rspec``` command. For example...
 
 ```
-   $> rake test:unit TESTS=object,apply
+   $> rake spec/logjam_spec.rb
 ```
 
-...would run only the object and apply tests.
+...would run only the the tests in the logjam_spec.rb test file.
