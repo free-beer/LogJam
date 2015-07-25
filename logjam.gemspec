@@ -11,11 +11,12 @@ spec = Gem::Specification.new do |s|
    s.summary     = "A library to aggregate logging."
    s.description = "LogJam is a library to simplify the use of logging across libraries and applications."
    s.homepage    = "https://github.com/free-beer/LogJam"
+   s.license     = "MIT"
 
-   s.add_development_dependency("rspec")
-   s.add_dependency("json")
-   s.add_dependency("configurative")
+   s.add_development_dependency("rspec", "~> 3.3")
+   s.add_dependency("json", "~> 1.8")
+   s.add_dependency("configurative", "~> 0.0")
 
-   s.files        = Dir.glob("{bin,lib}/**/*") + %w(license.txt README)
+   s.files        = Dir.glob("{bin,lib}/**/*") + %w(license.txt README.md)
    s.require_path = 'lib'
 end
