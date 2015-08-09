@@ -65,7 +65,7 @@ module LogJam
   # ==== Parameters
   # name::  The name of the logger to retrieve.
   def self.get_logger(name=nil)
-    LogJam.process_configuration(nil) if @@logjam_loggers.empty?
+    LogJam.process_configuration(Configuration.instance) if @@logjam_loggers.empty?
     @@logjam_loggers.fetch(name, @@logjam_loggers[nil])
   end
 
