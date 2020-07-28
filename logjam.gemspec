@@ -14,7 +14,7 @@ spec = Gem::Specification.new do |s|
    s.license     = "MIT"
 
    s.add_development_dependency("rspec", "~> 3.3")
-   s.add_dependency("json", "~> 1.8")
+   s.add_dependency("json", "~> 2.3")
    s.add_dependency("configurative", "~> 0.1")
 
    s.files        = Dir.glob("{bin,lib}/**/*") + %w(license.txt README.md)
